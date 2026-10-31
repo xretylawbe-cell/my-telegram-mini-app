@@ -48,6 +48,7 @@ th,td{text-align:left;padding:12px;border-bottom:1px solid #eee}
 <div class="stat">Today's Registrations<strong id="today">0</strong></div>
 </div>
 <button onclick="loadRegistrations()">Refresh Data</button>
+<button onclick="exportCSV()">Download Registrations (CSV)</button>
 <button onclick="logout()">Logout</button>
 </div>
 
@@ -179,7 +180,41 @@ async function logout(){
   document.getElementById("password").value = "";
   document.getElementById("message").textContent = "";
 }
+  
+function exportCSV(){
+  if(!registrations.length){
+    alert("There are no registrations to export.");
+    return;
+  }
 
+  const headers = ["Full Name","Email","Registration Date"];
+
+  const rows = registrations.map(item => [
+    item.full_name,
+    item.email,
+    new Date(item.created_at).toLocaleString()
+  ]);
+
+  const csv = [headers,...rows]
+    .map(row => row.map(value =>
+      '"' + String(value ?? "").replace(/"/g,'""') + '"'
+    ).join(","))
+    .join("\r\n");
+
+  const blob = new Blob(["\uFEFF" + csv], {
+    type:"text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "registrations.csv";
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+  
 async function checkSession(){
   const {data} = await client.auth.getSession();
 
