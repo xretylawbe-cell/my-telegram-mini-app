@@ -1,76 +1,88 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Telegram Mini App</title>  <script src="https://telegram.org/js/telegram-web-app.js"></script>  <style>
-    body {
-      margin: 0;
-      padding: 30px 20px;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f1f5f9;
-      color: #172033;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 25px 18px;
+  color: #172033;
+}
+.container {
+  max-width: 420px;
+  margin: 30px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 18px;
+}
+h2 { color: #2481cc; }
+input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  font-size: 16px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  background: #2481cc;
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  font-size: 16px;
+}
+.hidden { display: none; }
+</style>
+</head>
+<body><div class="container" id="home">
+  <h2>Welcome!</h2>
+  <p>Welcome to your first registration application.</p>
+  <button onclick="showPage('register')">Register Now</button>
+</div><div class="container hidden" id="register">
+  <h2>Create Account</h2>
+  <form id="registrationForm">
+    <input id="name" placeholder="Full name" required>
+    <input id="email" type="email" placeholder="Email address" required>
+    <button type="submit">Submit Registration</button>
+  </form>
+  <button onclick="showPage('home')">Go Back</button>
+</div><div class="container hidden" id="success">
+  <h2>Registration Complete!</h2>
+  <p id="successMessage"></p>
+  <button onclick="showPage('home')">Return Home</button>
+</div><script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
 
-    .app {
-      max-width: 400px;
-      margin: 40px auto;
-      padding: 28px 20px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 4px 18px #00000010;
-    }
+function showPage(page) {
+  document.querySelectorAll('.container').forEach(el => {
+    el.classList.add('hidden');
+  });
+  document.getElementById(page).classList.remove('hidden');
+}
 
-    h1 {
-      color: #2481cc;
-      font-size: 26px;
-    }
+document.getElementById('registrationForm')
+.addEventListener('submit', function(event) {
+  event.preventDefault();
 
-    p {
-      line-height: 1.6;
-      color: #526176;
-    }
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
 
-    button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 12px;
-      background: #2481cc;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+  if (!name || !email) return;
 
-    #message {
-      margin-top: 20px;
-      font-weight: bold;
-      color: #16834a;
-    }
-  </style></head><body>
-  <div class="app">
-    <h1>Welcome! 👋</h1><p>Your first Telegram Mini App is ready to begin.</p>
+  document.getElementById('successMessage').textContent =
+    'Thank you, ' + name + '! Your form has been completed.';
 
-<p>Tap the button below to test your app.</p>
-
-<button id="testButton">Tap Me</button>
-
-<div id="message"></div>
-
-  </div>  <script>
-    const tg = window.Telegram.WebApp;
-
-    tg.ready();
-
-    document.getElementById("testButton").addEventListener("click", function () {
-      document.getElementById("message").textContent =
-        "Success! Your app button is working. 🎉";
-
-      if (tg.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred("light");
-      }
-    });
-  </script></body>
+  showPage('success');
+});
+</script></body>
 </html>
