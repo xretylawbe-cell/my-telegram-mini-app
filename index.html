@@ -39,26 +39,39 @@ button {
   border-radius: 9px;
   font-size: 16px;
 }
+button:disabled { opacity: .6; }
 .hidden { display: none; }
+#status { margin-top: 15px; line-height: 1.5; }
 </style>
 </head>
 <body><div class="container" id="home">
   <h2>Welcome!</h2>
-  <p>Welcome to your first registration application.</p>
-  <button onclick="showPage('register')">Register Now</button>
+  <p>Welcome to your registration application.</p>
+  <button id="registerButton">Register Now</button>
 </div><div class="container hidden" id="register">
   <h2>Create Account</h2>
   <form id="registrationForm">
-    <input id="name" placeholder="Full name" required>
-    <input id="email" type="email" placeholder="Email address" required>
-    <button type="submit">Submit Registration</button>
+    <input id="name" placeholder="Full name"
+      maxlength="100" required>
+    <input id="email" type="email"
+      placeholder="Email address" maxlength="254" required>
+    <button id="submitButton" type="submit">
+      Submit Registration
+    </button>
   </form>
-  <button onclick="showPage('home')">Go Back</button>
+  <p id="status" role="status"></p>
+  <button id="backButton">Go Back</button>
 </div><div class="container hidden" id="success">
   <h2>Registration Complete!</h2>
   <p id="successMessage"></p>
-  <button onclick="showPage('home')">Return Home</button>
+  <button id="homeButton">Return Home</button>
 </div><script>
+const SUPABASE_URL =
+  "https://hgaywdgygjagtypnryfs.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_5ggvkl1i7IlezKsVK1AfUw_ewxOOauv";
+
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
@@ -70,19 +83,64 @@ function showPage(page) {
   document.getElementById(page).classList.remove('hidden');
 }
 
+document.getElementById('registerButton').onclick =
+  () => showPage('register');
+
+document.getElementById('backButton').onclick =
+  () => showPage('home');
+
+document.getElementById('homeButton').onclick =
+  () => showPage('home');
+
 document.getElementById('registrationForm')
-.addEventListener('submit', function(event) {
+.addEventListener('submit', async function(event) {
   event.preventDefault();
 
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
+  const button = document.getElementById('submitButton');
+  const status = document.getElementById('status');
 
   if (!name || !email) return;
 
-  document.getElementById('successMessage').textContent =
-    'Thank you, ' + name + '! Your form has been completed.';
+  button.disabled = true;
+  button.textContent = 'Submitting...';
+  status.textContent = '';
 
-  showPage('success');
+  try {
+    const response = await fetch(
+      SUPABASE_URL + '/rest/v1/registrations',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          full_name: name,
+          email: email
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Registration failed');
+    }
+
+    document.getElementById('successMessage').textContent =
+      'Thank you, ' + name + '! Your registration was saved.';
+
+    document.getElementById('registrationForm').reset();
+    showPage('success');
+
+  } catch (error) {
+    status.textContent = 'Error: ' + error.message;
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Submit Registration';
+  }
 });
 </script></body>
 </html>
