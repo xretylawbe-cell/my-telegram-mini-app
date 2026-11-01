@@ -1,231 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registration Admin Dashboard</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f3f5f9;color:#202938}
-header{background:#172554;color:white;padding:20px}
-main{max-width:1000px;margin:25px auto;padding:15px}
-.card{background:white;padding:20px;border-radius:12px;margin-bottom:18px;box-shadow:0 2px 10px #0000000a}
-input,button{padding:12px;border-radius:7px;border:1px solid #ddd;width:100%;margin:7px 0;font-size:15px}
-button{background:#1d4ed8;color:white;border:0;cursor:pointer}
-button.delete{background:#dc2626;width:auto}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.stat strong{display:block;font-size:28px;margin-top:8px}
-table{width:100%;border-collapse:collapse;min-width:550px}
-th,td{text-align:left;padding:12px;border-bottom:1px solid #eee}
-.table-wrap{overflow-x:auto}
-.hidden{display:none}
-#message{margin-top:10px;color:#b91c1c}
-@media(max-width:500px){.stats{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-
-<header>
-<h2>Registration Dashboard</h2>
-<p>Administrator Panel</p>
-</header>
-
-<main>
-<section id="login" class="card">
-<h2>Admin Login</h2>
-<input id="email" type="email" placeholder="Administrator email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<p id="message"></p>
-</section>
-
-<section id="dashboard" class="hidden">
-<div class="card">
-<h2>Overview</h2>
-<div class="stats">
-<div class="stat">Total Registrations<strong id="total">0</strong></div>
-<div class="stat">Today's Registrations<strong id="today">0</strong></div>
-</div>
-<button onclick="loadRegistrations()">Refresh Data</button>
-<button onclick="exportCSV()">Download Registrations (CSV)</button>
-<button onclick="logout()">Logout</button>
-</div>
-
-<div class="card">
-<h2>Registered Users</h2>
-<input id="search" placeholder="Search by name or email" oninput="displayRegistrations()">
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>Name</th><th>Email</th><th>Date</th><th>Action</th></tr>
-</thead>
-<tbody id="records"></tbody>
-</table>
-</div>
-<p id="status"></p>
-</div>
-</section>
-</main>
-
+:root{--ink:#0f1f4b;--hi:#ffd23f;--line:#dfe3f0;--mut:#5d6989}
+*{box-sizing:border-box}body{margin:0;background:#f5f6fb;color:#16213f;font:15px/1.5 Figtree,system-ui,sans-serif}
+h3,b.br{font-family:'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+header{background:var(--ink);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}header a{color:var(--hi);font-weight:700;margin-left:14px}
+.wrap{max-width:900px;margin:auto;padding:16px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.field{margin:10px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+input,select,textarea,button{font:inherit}input,select,textarea{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;background:#fff}textarea{min-height:90px}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:10px;padding:9px 13px;font-weight:700;cursor:pointer}.btn.hi{background:var(--hi);color:var(--ink)}.btn.sec{background:#e8ecf8;color:var(--ink)}
+.tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto}.tabs button{border:0;border-radius:20px;padding:9px 16px;background:#e8ecf8;color:var(--ink);font-weight:700;cursor:pointer;white-space:nowrap}.tabs .on{background:var(--ink);color:#fff}
+.bar{display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;margin-bottom:12px;align-items:center}@media(max-width:640px){.bar{grid-template-columns:1fr 1fr}.bar .btn{grid-column:1/-1}}
+.item{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:8px;flex-wrap:wrap}.grow{flex:1;min-width:180px}
+.note{padding:10px 12px;border-radius:10px;background:#eef2ff;margin:10px 0;font-size:14px}.err{background:#fde8e8;color:#8f1d22}.ok{background:#dff5ec;color:#08704c}.hid{display:none!important}.muted{color:var(--mut);font-size:13px}
+.tag{display:inline-block;border-radius:20px;padding:2px 9px;font-size:12px;font-weight:700;background:#e8ecf8}.tag.r{background:#fde8e8;color:#a3262b}
+.chk{display:flex;gap:9px;align-items:center;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;margin:8px 0}.chk input[type=checkbox],.chk input[type=radio]{width:18px;height:18px;flex:none}.chk input[type=text]{border:0;padding:4px}
+</style></head><body>
+<header><b class="br">Admin dashboard</b><span><a href="admin-exams.html">Courses, codes, settings</a><a href="teach.html">Live classes</a></span></header>
+<div class="wrap">
+<section id="login" class="card" style="max-width:420px;margin:40px auto"><h3>Staff sign in</h3>
+<div class="field"><label>Email</label><input id="em" type="email"></div><div class="field"><label>Password</label><input id="pw" type="password"></div>
+<button class="btn" id="go">Sign in</button><div id="lm"></div></section>
+<section id="main" class="hid">
+<div class="tabs" id="tabs"></div>
+<div class="card hid" id="form"></div>
+<div class="bar"><button class="btn hi" id="newb">New</button><select id="flt"></select><input id="srch" placeholder="Search"></div>
+<div id="list"></div></section></div>
 <script>
-const SUPABASE_URL = "https://hgaywdgygjagtypnryfs.supabase.co";
-const SUPABASE_KEY = "sb_publishable_5ggvkl1i7IlezKsVK1AfUw_ewxOOauv";
-
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let registrations = [];
-
-async function login(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const message = document.getElementById("message");
-
-  message.textContent = "Signing in...";
-
-  const {error} = await client.auth.signInWithPassword({email,password});
-
-  if(error){
-    message.textContent = error.message;
-    return;
-  }
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-  await loadRegistrations();
-}
-
-async function loadRegistrations(){
-  const status = document.getElementById("status");
-  status.textContent = "Loading registrations...";
-
-  const {data,error} = await client
-    .from("registrations")
-    .select("*")
-    .order("created_at",{ascending:false});
-
-  if(error){
-    status.textContent = error.message;
-    return;
-  }
-
-  registrations = data || [];
-  document.getElementById("total").textContent = registrations.length;
-
-  const today = new Date().toDateString();
-  const todayCount = registrations.filter(item =>
-    new Date(item.created_at).toDateString() === today
-  ).length;
-
-  document.getElementById("today").textContent = todayCount;
-  status.textContent = registrations.length + " registration(s) found.";
-  displayRegistrations();
-}
-
-function displayRegistrations(){
-  const search = document.getElementById("search").value.toLowerCase();
-  const records = document.getElementById("records");
-
-  const filtered = registrations.filter(item =>
-    item.full_name.toLowerCase().includes(search) ||
-    item.email.toLowerCase().includes(search)
-  );
-
-  records.innerHTML = "";
-
-  filtered.forEach(item => {
-    const row = document.createElement("tr");
-
-    const name = document.createElement("td");
-    name.textContent = item.full_name;
-
-    const email = document.createElement("td");
-    email.textContent = item.email;
-
-    const date = document.createElement("td");
-    date.textContent = new Date(item.created_at).toLocaleString();
-
-    const action = document.createElement("td");
-    const button = document.createElement("button");
-    button.textContent = "Delete";
-    button.className = "delete";
-    button.onclick = () => deleteRegistration(item.id);
-    action.appendChild(button);
-
-    row.append(name,email,date,action);
-    records.appendChild(row);
-  });
-}
-
-async function deleteRegistration(id){
-  if(!confirm("Are you sure you want to delete this registration?")) return;
-
-  const {error} = await client
-    .from("registrations")
-    .delete()
-    .eq("id",id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  await loadRegistrations();
-}
-
-async function logout(){
-  await client.auth.signOut();
-  registrations = [];
-  document.getElementById("dashboard").classList.add("hidden");
-  document.getElementById("login").classList.remove("hidden");
-  document.getElementById("password").value = "";
-  document.getElementById("message").textContent = "";
-}
-  
-function exportCSV(){
-  if(!registrations.length){
-    alert("There are no registrations to export.");
-    return;
-  }
-
-  const headers = ["Full Name","Email","Registration Date"];
-
-  const rows = registrations.map(item => [
-    item.full_name,
-    item.email,
-    new Date(item.created_at).toLocaleString()
-  ]);
-
-  const csv = [headers,...rows]
-    .map(row => row.map(value =>
-      '"' + String(value ?? "").replace(/"/g,'""') + '"'
-    ).join(","))
-    .join("\r\n");
-
-  const blob = new Blob(["\uFEFF" + csv], {
-    type:"text/csv;charset=utf-8;"
-  });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "registrations.csv";
-  link.click();
-
-  URL.revokeObjectURL(url);
-}
-  
-async function checkSession(){
-  const {data} = await client.auth.getSession();
-
-  if(data.session){
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-    await loadRegistrations();
-  }
-}
-
-checkSession();
-</script>
-</body>
-</html>
+(()=>{
+const db=window.supabase.createClient("https://hsjaopfkyltvjpsxhdii.supabase.co","sb_publishable_UXN0budPmcKVEIcUKepfqA___bLRhpK");
+const $=i=>document.getElementById(i),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const msg=(t,k="")=>{const e=$("fm");if(e)e.innerHTML=t?`<div class="note ${k}">${esc(t)}</div>`:""};
+let tab="subjects",L={subjects:[],topics:[]},rows={},editRow=null,qe={};
+const nm=(k,id)=>L[k].find(x=>x.id===id)?.name||"?";
+/* field = [column, label, type, required]; types: text, area, num, chk, sel:<lookup>, opt:a,b,c */
+const C={
+ subjects:{t:"subjects",l:"Subject",o:"sort_order",s:"name",f:[["name","Name","text",1],["slug","Short name (use-of-english for English)","text",1],["description","Description","area"],["icon","Icon (one emoji)","text"],["sort_order","Order","num"],["is_published","Visible to students","chk"]],title:r=>r.name,sub:r=>r.slug},
+ topics:{t:"topics",l:"Topic",o:"sort_order",s:"name",flt:["subject_id","subjects"],f:[["subject_id","Subject","sel:subjects",1],["name","Name","text",1],["description","Description","area"],["sort_order","Order","num"],["is_published","Visible to students","chk"]],title:r=>r.name,sub:r=>"Subject: "+nm("subjects",r.subject_id)},
+ lessons:{t:"lessons",l:"Lesson",o:"sort_order",s:"title",flt:["topic_id","topics"],f:[["topic_id","Topic","sel:topics",1],["title","Title","text",1],["summary","Short summary","text"],["lesson_type","Type","opt:written,audio,video"],["written_content","Notes (text)","area"],["audio_url","Audio link (https)","text"],["video_url","Video link (https)","text"],["duration_minutes","Minutes","num"],["sort_order","Order","num"],["is_published","Visible to students","chk"]],title:r=>r.title,sub:r=>"Topic: "+nm("topics",r.topic_id)},
+ questions:{t:"questions",l:"Question",o:"id",s:"question_text",flt:["subject_id","subjects"],title:r=>(r.question_text||"").slice(0,90),sub:r=>nm("subjects",r.subject_id)+(r.question_year?", "+r.question_year:"")}
+};
+async function staff(u){const {data}=await db.from("profiles").select("role").eq("id",u.id).maybeSingle();
+ if(!data||!["admin","teacher"].includes(data.role)){await db.auth.signOut();$("lm").innerHTML='<div class="note err">This account does not have staff access.</div>';return}
+ $("login").classList.add("hid");$("main").classList.remove("hid");
+ $("tabs").innerHTML=Object.keys(C).map(k=>`<button data-tab="${k}">${C[k].l}s</button>`).join("");await lookups();show("subjects")}
+$("go").onclick=async()=>{const {data,error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});if(error){$("lm").innerHTML=`<div class="note err">${esc(error.message)}</div>`;return}staff(data.user)};
+async function lookups(){const [a,b]=await Promise.all([db.from("subjects").select("id,name").order("sort_order"),db.from("topics").select("id,name,subject_id").order("sort_order")]);
+ L.subjects=a.data||[];L.topics=(b.data||[]).map(t=>({...t,name:t.name+" ("+nm("subjects",t.subject_id)+")"}))}
+function show(t){tab=t;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));$("form").classList.add("hid");$("srch").value="";
+ const c=C[t];$("flt").classList.toggle("hid",!c.flt);if(c.flt)$("flt").innerHTML='<option value="">All</option>'+L[c.flt[1]].map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");load()}
+$("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b)show(b.dataset.tab)};
+$("flt").onchange=load;let st;$("srch").oninput=()=>{clearTimeout(st);st=setTimeout(load,300)};
+async function load(){const c=C[tab];let q=db.from(c.t).select("*").order(c.o,{ascending:tab!=="questions"}).limit(50);
+ if(c.flt&&$("flt").value)q=q.eq(c.flt[0],+$("flt").value);if($("srch").value.trim())q=q.ilike(c.s,"%"+$("srch").value.trim()+"%");
+ const {data,error}=await q;if(error){$("list").innerHTML=`<div class="note err">${esc(error.message)}</div>`;return}
+ rows={};(data||[]).forEach(r=>rows[r.id]=r);
+ $("list").innerHTML=(data||[]).map(r=>`<div class="item"><span class="grow"><b>${esc(c.title(r))}</b> ${r.is_published?"":'<span class="tag r">Hidden</span>'}<div class="muted">${esc(c.sub(r))}</div></span><button class="btn sec" data-e="${r.id}">Edit</button><button class="btn sec" data-p="${r.id}">${r.is_published?"Hide":"Show"}</button><button class="btn sec" data-d="${r.id}">Delete</button></div>`).join("")||'<p class="muted">Nothing here yet. Tap New to add one.</p>'}
+$("list").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset,c=C[tab];let r;
+ if(d.e)return tab==="questions"?openQ(rows[d.e]):openForm(rows[d.e]);
+ if(d.p)r=await db.from(c.t).update({is_published:!rows[d.p].is_published}).eq("id",+d.p);
+ else if(d.d){if(!confirm("Delete this "+c.l.toLowerCase()+"? This cannot be undone."))return;r=await db.from(c.t).delete().eq("id",+d.d)}
+ if(r?.error)alert(r.error.code==="23503"?"This is linked to other content or to students' past results, so it cannot be deleted. Hide it instead.":r.error.message);
+ await lookups();load()};
+$("newb").onclick=()=>tab==="questions"?openQ(null):openForm(null);
+function fld(k,l,t,v){const id="x_"+k;
+ if(t==="chk")return `<label class="chk"><input type="checkbox" id="${id}" ${v?"checked":""}>${l}</label>`;
+ if(t==="area")return `<div class="field"><label>${l}</label><textarea id="${id}">${esc(v)}</textarea></div>`;
+ if(/^(sel|opt):/.test(t)){const s=t.startsWith("sel:");let o=s?L[t.slice(4)].map(x=>[x.id,x.name]):t.slice(4).split(",").map(x=>[x,x]);
+  if(v&&!o.some(x=>String(x[0])===String(v)))o.unshift([v,v]);
+  return `<div class="field"><label>${l}</label><select id="${id}">${o.map(([a,b])=>`<option value="${esc(a)}" ${String(a)===String(v)?"selected":""}>${esc(b)}</option>`).join("")}</select></div>`}
+ return `<div class="field"><label>${l}</label><input id="${id}" type="${t==="num"?"number":"text"}" value="${esc(v)}"></div>`}
+function openForm(r){editRow=r;const c=C[tab];$("form").classList.remove("hid");
+ $("form").innerHTML=`<h3>${r?"Edit":"New"} ${c.l.toLowerCase()}</h3>`+c.f.map(([k,l,t])=>fld(k,l,t,r?r[k]:(t==="chk"?true:(k==="sort_order"?0:"")))).join("")+`<div class="grid"><button class="btn hi" id="save">Save</button> <button class="btn sec" id="cancel">Cancel</button></div><div id="fm"></div>`;
+ $("save").onclick=save;$("cancel").onclick=()=>$("form").classList.add("hid");scrollTo(0,0)}
+async function save(){const c=C[tab],r={};
+ for(const [k,l,t,req] of c.f){const e=$("x_"+k);let v=t==="chk"?e.checked:e.value.trim();
+  if(t==="num")v=v===""?null:+v;else if(t.startsWith("sel:"))v=+v;else if(v==="")v=null;
+  if(req&&(v===null||v===""))return msg(l+" is required.","err");r[k]=v}
+ for(const k of ["audio_url","video_url"])if(r[k]&&!/^https:\/\//i.test(r[k]))return msg("Links must start with https://","err");
+ const {error}=await(editRow?db.from(c.t).update(r).eq("id",editRow.id):db.from(c.t).insert(r));
+ if(error)return msg(error.message,"err");$("form").classList.add("hid");await lookups();load()}
+/* questions: one editor for the question, its options and the answer key */
+async function openQ(r){let o=[],a=null;
+ if(r){const [x,y]=await Promise.all([db.from("question_options").select("*").eq("question_id",r.id),db.from("question_answers").select("*").eq("question_id",r.id).maybeSingle()]);o=x.data||[];a=y.data}
+ qe={r,opts:Object.fromEntries(o.map(z=>[z.option_label,z]))};
+ const cor=a?o.find(z=>z.id===a.correct_option_id)?.option_label:"";
+ $("form").classList.remove("hid");
+ $("form").innerHTML=`<h3>${r?"Edit":"New"} question</h3>`+fld("subject_id","Subject","sel:subjects",r?.subject_id||$("flt").value||L.subjects[0]?.id)+fld("question_text","Question","area",r?.question_text||"")+
+ `<label style="font-size:13px;font-weight:700">Options (tick the correct one)</label>`+["A","B","C","D"].map(l=>`<label class="chk"><input type="radio" name="corr" value="${l}" ${cor===l?"checked":""}><b>${l}</b><input type="text" id="o_${l}" value="${esc(qe.opts[l]?.option_text||"")}" placeholder="Option ${l}"></label>`).join("")+
+ fld("explanation","Explanation shown after the test","area",a?.explanation||"")+fld("question_year","Year","num",r?.question_year||"")+fld("difficulty","Difficulty","opt:easy,medium,hard",r?.difficulty||"medium")+fld("is_published","Visible in tests","chk",r?r.is_published:true)+
+ `<div class="grid"><button class="btn hi" id="save">Save question</button> <button class="btn sec" id="cancel">Cancel</button></div><div id="fm"></div>`;
+ $("save").onclick=saveQ;$("cancel").onclick=()=>$("form").classList.add("hid");scrollTo(0,0)}
+async function saveQ(){const g=k=>$("x_"+k).value.trim(),lab=["A","B","C","D"],tx=Object.fromEntries(lab.map(l=>[l,$("o_"+l).value.trim()])),cor=document.querySelector("input[name=corr]:checked")?.value;
+ if(!g("question_text"))return msg("Write the question first.","err");
+ if(lab.filter(l=>tx[l]).length<2)return msg("Add at least two options.","err");
+ if(!cor||!tx[cor])return msg("Tick the correct option, and fill it in.","err");
+ const q={subject_id:+g("subject_id"),question_text:g("question_text"),question_year:g("question_year")?+g("question_year"):null,difficulty:g("difficulty"),is_published:$("x_is_published").checked};
+ let id=qe.r?.id,e;if(id)e=(await db.from("questions").update(q).eq("id",id)).error;else{const r=await db.from("questions").insert(q).select("id").single();e=r.error;id=r.data?.id}
+ if(e)return msg(e.message,"err");
+ const ids={};
+ for(const l of lab){if(!tx[l])continue;const ex=qe.opts[l];
+  if(ex){const r=await db.from("question_options").update({option_text:tx[l]}).eq("id",ex.id);if(r.error)return msg(r.error.message,"err");ids[l]=ex.id}
+  else{const r=await db.from("question_options").insert({question_id:id,option_label:l,option_text:tx[l]}).select("id").single();if(r.error)return msg(r.error.message,"err");ids[l]=r.data.id}}
+ const r2=await db.from("question_answers").upsert({question_id:id,correct_option_id:ids[cor],explanation:g("explanation")||null},{onConflict:"question_id"});
+ if(r2.error)return msg(r2.error.message,"err");
+ for(const l of lab){const ex=qe.opts[l];if(ex&&!tx[l])await db.from("question_options").delete().eq("id",ex.id)}
+ $("form").classList.add("hid");load()}
+db.auth.getSession().then(({data})=>{if(data.session)staff(data.session.user)});
+})();
+</script></body></html>
