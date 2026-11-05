@@ -2490,9 +2490,4 @@ e=et,e.SIGN_OUT_SCOPES=gi,e.StorageApiError=It,e.SupabaseClient=na,e.WebSocketFa
 lient=ra,e.isAuthApiError=tr,e.isAuthError=F,e.isAuthImplicitGrantRedirectError=ar,e.isAuthPKCECod
 eVerifierMissingError=cr,e.isAuthRefreshDiscardedError=fr,e.isAuthRetryableFetchError=ur,e.isAuthS
 essionMissingError=nr,e.isAuthWeakPasswordError=mr,e.lockInternals=Q,e.navigatorLock=Si,e.postgres
-ChangesFilter=dt,e.processLock=wi,e})({}); 11/5/26, 3:45 AM
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js
-
-[1] 0-9a- f
-
-[2] 0-9a-f
+ChangesFilter=dt,e.processLock=wi,e})({});
